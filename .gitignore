@@ -1,0 +1,10 @@
+# Windows alternate data streams
+*:Zone.Identifier
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/

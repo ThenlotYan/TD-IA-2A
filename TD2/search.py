@@ -1,6 +1,6 @@
+import numpy as np
 """Cost-based search algorithms for the Pokémon environment."""
 
-from __future__ import annotations
 
 import heapq
 import random
@@ -47,8 +47,7 @@ def manhattan_distance(
 ) -> int:
     """Return the Manhattan distance between two states."""
     return (
-        abs(state[0] - goal[0])
-        + abs(state[1] - goal[1])
+        np.sqrt((state[0] - goal[0])**2 + (state[1] - goal[1])**2)
     )
 
 
@@ -129,7 +128,39 @@ def dijkstra(
     considered_states : int
         Number of states removed from the priority queue.
     """
-    ...
+    frontier: list[tuple[int, int, State]] = []
+    tie_breaker = count()
+    heapq.heappush(frontier, (0, next(tie_breaker), start))
+
+    costs: dict[State, int] = {start: 0}
+    parents: dict[State, State | None] = {start: None}
+    considered_states = 0
+
+    while frontier:
+        current_cost, _, current = heapq.heappop(frontier)
+
+        if current_cost != costs[current]:
+            continue
+
+        considered_states += 1
+
+        if current == goal:
+            return reconstruct_path(parents, goal), considered_states
+
+        for next_state in successors(game_map, current):
+            next_cost = current_cost + movement_cost(game_map, next_state)
+
+            if next_cost >= costs.get(next_state, float("inf")):
+                continue
+
+            costs[next_state] = next_cost
+            parents[next_state] = current
+            heapq.heappush(
+                frontier,
+                (next_cost, next(tie_breaker), next_state),
+            )
+
+    raise RuntimeError("No path exists between the start and the goal.")
 
 
 def a_star(
@@ -148,4 +179,40 @@ def a_star(
     considered_states : int
         Number of states removed from the priority queue.
     """
-    ...
+    frontier: list[tuple[int, int, int, State]] = []
+    tie_breaker = count()
+    heapq.heappush(
+        frontier,
+        (manhattan_distance(start, goal), 0, next(tie_breaker), start),
+    )
+
+    costs: dict[State, int] = {start: 0}
+    parents: dict[State, State | None] = {start: None}
+    considered_states = 0
+
+    while frontier:
+        _, current_cost, _, current = heapq.heappop(frontier)
+
+        if current_cost != costs[current]:
+            continue
+
+        considered_states += 1
+
+        if current == goal:
+            return reconstruct_path(parents, goal), considered_states
+
+        for next_state in successors(game_map, current):
+            next_cost = current_cost + movement_cost(game_map, next_state)
+
+            if next_cost >= costs.get(next_state, float("inf")):
+                continue
+
+            costs[next_state] = next_cost
+            parents[next_state] = current
+            priority = next_cost + manhattan_distance(next_state, goal)
+            heapq.heappush(
+                frontier,
+                (priority, next_cost, next(tie_breaker), next_state),
+            )
+
+    raise RuntimeError("No path exists between the start and the goal.")

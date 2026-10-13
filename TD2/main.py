@@ -14,18 +14,18 @@ from search import (
 
 # Keep a fixed seed while developing and grading.
 # Use None to obtain a different random map each time.
-MAP_SEED = 1
+MAP_SEED = 12
 RANDOM_PATH_SEED = 10
 
 
 def main() -> None:
     """Generate one map and compare Dijkstra with A*."""
     game_map, start, goal = generate_hard_map(
-        rows=20,
-        columns=30,
+        rows=10,
+        columns=15,
         tree_probability=0.20,
         rock_probability=0.45,
-        minimum_distance=30,
+        minimum_distance=10,
         seed=MAP_SEED,
     )
 
